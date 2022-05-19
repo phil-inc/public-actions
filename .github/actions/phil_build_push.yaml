@@ -1,0 +1,26 @@
+name: phil_build_push
+inputs: 
+  name:
+    description: 'Name of project'
+    required: true
+  tag:
+    description: 'Tag to associate with built image'
+    required: true
+runs: 
+  using: "composite"
+  steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: false
+          tags: philinc/${{ inputs.name }}:${{ inputs.tag }}
