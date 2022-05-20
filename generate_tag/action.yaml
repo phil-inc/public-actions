@@ -17,22 +17,22 @@ runs:
       env:
         EVENT_CONTEXT: "${{ inputs.event }}"
       shell: bash
-      run: echo $EVENT_CONTEXT
-# EVENT_TYPE=$(echo $EVENT_CONTEXT | jq -r .ref | awk -F/ '{ print $2}')
-# REF=$(echo $EVENT_CONTEXT | jq -r .ref | sed -e 's/\// /2' | awk '{print $2}')
-# if [ "$EVENT_TYPE" = "tags" ]; then
-#   echo "::set-output name=tag::$(echo $REF | sed -e 's/v//1')"
-#   exit 0
-# fi
-# TAG=${{ inputs.sha }}
-# DEFAULT_BRANCH=$(echo $EVENT_CONTEXT | jq -r .repository.default_branch)
-# if [ "$REF" != "$DEFAULT_BRANCH" ]; then
-#   if [[ $REF = feature/* ]]; then
-#     TAG=$(echo "$REF" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')-$TAG
-#   else
-#     echo "::set-output name=tag::''"
-#     exit 0
-#   fi
-# fi
-# echo "::set-output name=tag::$(echo $TAG)"
-# exit 0
+      run: |
+        EVENT_TYPE=$(echo $EVENT_CONTEXT | jq -r .ref | awk -F/ '{ print $2}')
+        REF=$(echo $EVENT_CONTEXT | jq -r .ref | sed -e 's/\// /2' | awk '{print $2}')
+        if [ "$EVENT_TYPE" = "tags" ]; then
+          echo "::set-output name=tag::$(echo $REF | sed -e 's/v//1')"
+          exit 0
+        fi
+        TAG=${{ inputs.sha }}
+        DEFAULT_BRANCH=$(echo $EVENT_CONTEXT | jq -r .repository.default_branch)
+        if [ "$REF" != "$DEFAULT_BRANCH" ]; then
+          if [[ $REF = feature/* ]]; then
+            TAG=$(echo "$REF" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')-$TAG
+          else
+            echo "::set-output name=tag::''"
+            exit 0
+          fi
+        fi
+        echo "::set-output name=tag::$(echo $TAG)"
+        exit 0
