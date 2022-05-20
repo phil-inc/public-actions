@@ -9,7 +9,7 @@ runs:
   using: "composite"
   steps:
     - name: If the ref is a tag, remove the leading v
-      if:  startsWith("${{ github.ref_name }}" , "v")
+      if: "${{ github.ref_type }}" == "tag" && startsWith("${{ github.ref_name }}" , "v")
       run: echo "::set-output name=TAG::$( echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )"
       shell: bash
 
@@ -19,7 +19,7 @@ runs:
       shell: bash
 
     - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
-      if: "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "release"
+      if: "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}"
       run: echo "::set-ouput name=TAG::${\"${{ github.sha }}\":8}"
       shell: bash
 
