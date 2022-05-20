@@ -23,5 +23,7 @@ runs:
 
     - name: Set output
       id: set-output
-      run: echo "::set-output name=tag::$TAG"
+      run: |
+        echo "Tag is $TAG"
+        echo "::set-output name=tag::$TAG"
       shell: bash
