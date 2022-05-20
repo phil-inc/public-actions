@@ -8,22 +8,20 @@ runs:
   steps:
     - name: If the ref is a tag, remove the leading v
       if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
-      run: TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )
+      run: export TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )
       shell: bash
 
     - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
       if: startsWith(${{ github.ref_name }}, 'feature/')
-      run: TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')
+      run: export TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')
       shell: bash
 
     - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
       if: ${{ github.ref_name == github.event.repository.default_branch }}
-      run: TAG=${\"${{ github.sha }}\":8}
+      run: export TAG=${\"${{ github.sha }}\":8}
       shell: bash
 
     - name: Set output
       id: set-output
-      run: |
-        echo "Tag is $TAG"
-        echo "::set-output name=tag::$TAG"
+      run: echo "::set-output name=tag::$TAG"
       shell: bash
