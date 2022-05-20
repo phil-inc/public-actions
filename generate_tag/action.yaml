@@ -15,7 +15,7 @@ runs:
     steps:
       - id: "generate-image-tag"
         env:
-          EVENT_CONTEXT: "${{ toJSON(inputs.event) }}"
+          EVENT_CONTEXT: ${{ inputs.event }}
         shell: bash
         run: |
           EVENT_TYPE=$(echo $EVENT_CONTEXT | jq -r .ref | awk -F/ '{ print $2}')
