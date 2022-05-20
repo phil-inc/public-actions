@@ -1,10 +1,6 @@
 # This action expects the git event data to be stored as an environment variable by the calling workflow
 
 name: phil_generate_tag
-inputs:
-  sha:
-    description: "Shortened commit SHA"
-    required: true
 outputs:
   tag:
     description: "Generated tag based on Git event"
@@ -13,16 +9,16 @@ runs:
   using: "composite"
   steps:
     - name: If the ref is a tag, remove the leading v
-       if:  startsWith(${GITHUB_REF_NAME} , "v")
-       run: echo "::set-output name=TAG::$( echo $GITHUB_REF_NAME | sed -e 's/v//1' )
+       if:  startsWith(${{ github.ref_name }} , "v")
+       run: echo "::set-output name=TAG::$( echo ${{ github.ref_name }} | sed -e 's/v//1' )"
 
     - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
-      if: startsWith(${GITHUB_REF_NAME}, "feature/")
-      run: echo "::set-output name=TAG::$( echo $GITHUB_REF_NAME | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')
+      if: startsWith(${{ github.ref_name }}, "feature/")
+      run: echo "::set-output name=TAG::$( echo ${{ github.ref_name }} | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')"
 
     - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
-       if: ${GITHUB_REF_NAME} == "master" || ${GITHUB_REF_NAME} == "release"
-       run: echo "::set-ouput name=TAG::${GITHUB_SHA:8}
+       if: ${{ github.ref_name }} == "master" || ${{ github.ref_name }} == "release"
+       run: echo "::set-ouput name=TAG::${${{ github.sha }}:8}"
 
     # - id: generate-image-tag
     #   shell: bash
