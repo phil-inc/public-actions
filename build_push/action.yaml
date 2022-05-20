@@ -1,13 +1,21 @@
 # This action expects a Docker username and password be stored as environment variables by the calling workflow
 
 name: phil_build_push
-inputs: 
+inputs:
+  registry:
+    description: "Registry for image"
+    required: false
+    default: "philinc"
   name:
-    description: 'Name of project'
+    description: "Name of project"
     required: true
   tag:
-    description: 'Tag to associate with built image'
+    description: "Tag to associate with built image"
     required: true
+  push:
+    description: "Whether or not to push the image to the registry"
+    required: false
+    default: "false"
 runs: 
   using: "composite"
   steps:
@@ -21,5 +29,5 @@ runs:
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
-        push: false
-        tags: philinc/${{ inputs.name }}:${{ inputs.tag }}
+        push: ${{ inputs.push }}
+        tags: ${{ inputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}

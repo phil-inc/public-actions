@@ -12,24 +12,36 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: generate-image-tag
-      shell: bash
-      run: |
-        EVENT_TYPE=$(echo $EVENT_CONTEXT | jq -r .ref | awk -F/ '{ print $2}')
-        REF=$(echo $EVENT_CONTEXT | jq -r .ref | sed -e 's/\// /2' | awk '{print $2}')
-        if [ "$EVENT_TYPE" = "tags" ]; then
-          echo "::set-output name=tag::$(echo $REF | sed -e 's/v//1')"
-          exit 0
-        fi
-        TAG=${{ inputs.sha }}
-        DEFAULT_BRANCH=$(echo $EVENT_CONTEXT | jq -r .repository.default_branch)
-        if [ "$REF" != "$DEFAULT_BRANCH" ]; then
-          if [[ $REF = feature/* ]]; then
-            TAG=$(echo "$REF" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')-$TAG
-          else
-            echo "::set-output name=tag::''"
-            exit 0
-          fi
-        fi
-        echo "::set-output name=tag::$(echo $TAG)"
-        exit 0
+    - name: If the ref is a tag, remove the leading v
+       if:  startsWith(${GITHUB_REF_NAME} , "v")
+       run: echo "::set-output name=TAG::$( echo $GITHUB_REF_NAME | sed -e 's/v//1' )
+
+    - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
+      if: startsWith(${GITHUB_REF_NAME}, "feature/")
+      run: echo "::set-output name=TAG::$( echo $GITHUB_REF_NAME | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')
+
+    - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
+       if: ${GITHUB_REF_NAME} == "master" || ${GITHUB_REF_NAME} == "release"
+       run: echo "::set-ouput name=TAG::${GITHUB_SHA:8}
+
+    # - id: generate-image-tag
+    #   shell: bash
+    #   run: |
+    #     EVENT_TYPE=$(echo $EVENT_CONTEXT | jq -r .ref | awk -F/ '{ print $2}')
+    #     REF=$(echo $EVENT_CONTEXT | jq -r .ref | sed -e 's/\// /2' | awk '{print $2}')
+    #     if [ "$EVENT_TYPE" = "tags" ]; then
+    #       echo "::set-output name=tag::$(echo $REF | sed -e 's/v//1')"
+    #       exit 0
+    #     fi
+    #     TAG=${{ inputs.sha }}
+    #     DEFAULT_BRANCH=$(echo $EVENT_CONTEXT | jq -r .repository.default_branch)
+    #     if [ "$REF" != "$DEFAULT_BRANCH" ]; then
+    #       if [[ $REF = feature/* ]]; then
+    #         TAG=$(echo "$REF" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')-$TAG
+    #       else
+    #         echo "::set-output name=tag::''"
+    #         exit 0
+    #       fi
+    #     fi
+    #     echo "::set-output name=tag::$(echo $TAG)"
+    #     exit 0
