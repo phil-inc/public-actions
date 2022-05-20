@@ -1,8 +1,7 @@
+# This action expects the git event data to be stored as an environment variable by the calling workflow
+
 name: phil_generate_tag
 inputs:
-  event:
-    description: "Event data"
-    required: true
   sha:
     description: "Shortened commit SHA"
     required: true
@@ -14,8 +13,6 @@ runs:
   using: "composite"
   steps:
     - id: generate-image-tag
-      env:
-        EVENT_CONTEXT: "${{ inputs.event }}"
       shell: bash
       run: |
         EVENT_TYPE=$(echo $EVENT_CONTEXT | jq -r .ref | awk -F/ '{ print $2}')
