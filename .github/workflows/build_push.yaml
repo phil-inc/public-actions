@@ -6,16 +6,20 @@ on:
     inputs:
       registry:
         description: "Registry for image"
+        type: string
         required: false
         default: "philinc"
       name:
         description: "Name of project"
+        type: string
         required: true
       tag:
         description: "Tag to associate with built image"
+        type: string
         required: true
       push:
         description: "Whether or not to push the image to the registry"
+        type: boolean
         required: false
         default: "false"
 jobs:
