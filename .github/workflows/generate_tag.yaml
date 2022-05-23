@@ -6,11 +6,17 @@ on:
         description: "Generated tag based on Git event"
         value: ${{ jobs.generate_tag.outputs.tag }}
 jobs:
-  gemerate_tag:
+  generate_tag:
     runs-on: self-hosted
+    container:
+      image: "ubuntu:latest"
     outputs:
       tag: ${{ steps.set-output.outputs.tag }}
     steps:
+      - name: Install jq
+        run: apt-get update && apt-get install -y jq
+        shell: bash
+
       - name: If the ref is a tag, remove the leading v
         if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
         run: export TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )
