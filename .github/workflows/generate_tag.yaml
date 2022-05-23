@@ -20,25 +20,22 @@ jobs:
       - name: If the ref is a tag, remove the leading v
         if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
         run: |
-          export TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )
-          echo $TAG
+          echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )" >> $GITHUB_ENV
         shell: bash
 
       - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
         if: startsWith(${{ github.ref_name }}, 'feature/')
         run: |
-          export TAG=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')
-          echo $TAG
+          echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' | awk '{print tolower($0)}')" >> $GITHUB_ENV
         shell: bash
 
       - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
         if: ${{ github.ref_name == github.event.repository.default_branch }}
         run: |
-          export TAG=${\"${{ github.sha }}\":8}
-          echo $TAG
+          echo "tag=${\"${{ github.sha }}\":8}" >> $GITHUB_ENV
         shell: bash
 
       - name: Set output
         id: set-output
-        run: echo "::set-output name=tag::$TAG"
+        run: echo "::set-output name=tag::${{ env.tag }}"
         shell: bash
