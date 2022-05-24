@@ -1,0 +1,39 @@
+name: phil_generate_tag
+on:
+  workflow_call:
+    outputs:
+      tag:
+        description: "Generated tag based on Git event"
+        value: ${{ jobs.generate_tag.outputs.tag }}
+jobs:
+  generate_tag:
+    runs-on: self-hosted
+    container:
+      image: "ubuntu:latest"
+    outputs:
+      tag: ${{ steps.set-output.outputs.tag }}
+    steps:
+      - name: Install jq
+        run: apt-get update && apt-get install -y jq
+        shell: bash
+
+      - name: If the ref is a tag, remove the leading v
+        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
+        run: echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )" >> $GITHUB_ENV
+        shell: bash
+
+      - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
+        if: startsWith(${{ github.ref_name }}, 'feature/')
+        # Remove "feature/", replace underscores with dashes, remove special characters, remove leading dashes
+        run: echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' -e 's/[^0-9a-zA-Z\-]*//g' -e 's/^-*//g' | awk '{print tolower($0)}')" >> $GITHUB_ENV
+        shell: bash
+
+      - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
+        if: ${{ github.ref_name == github.event.repository.default_branch }}
+        run: echo "tag=${\"${{ github.sha }}\":8}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set output
+        id: set-output
+        run: echo "::set-output name=tag::${{ env.tag }}"
+        shell: bash
