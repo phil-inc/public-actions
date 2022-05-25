@@ -30,7 +30,7 @@ jobs:
 
       - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
         if: ${{ github.ref_name == github.event.repository.default_branch }}
-        run: echo "tag=${GITHUB_SHA:8}" >> $GITHUB_ENV
+        run: echo "tag=${GITHUB_SHA:0:8}" >> $GITHUB_ENV
         shell: bash
 
       - name: Set output
