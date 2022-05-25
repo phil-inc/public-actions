@@ -9,6 +9,7 @@ jobs:
   generate_tag:
     container:
       image: "ubuntu:latest"
+    runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.set-output.outputs.tag }}
     steps:

@@ -26,6 +26,7 @@ jobs:
   build_and_push:
     container: 
       image: "docker:latest"
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
