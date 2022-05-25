@@ -24,7 +24,7 @@ jobs:
 
       - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
         if: ${{ github.ref_name == github.event.repository.default_branch }}
-        run: tag=$(echo ${{ github.sha }} | cut -c 1-8)  
+        run: echo "tag=$(echo ${{ github.sha }} | cut -c 1-8)" >> $GITHUB_ENV  
 
       - name: Set output
         id: set-output
