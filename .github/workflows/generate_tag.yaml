@@ -18,7 +18,7 @@ jobs:
         run: echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )" >> $GITHUB_ENV
 
       - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
-        if: startsWith(${{ github.ref_name }}, 'feature/')
+        if: startsWith(github.ref_name, 'feature/')
         # Remove "feature/", replace underscores with dashes, remove special characters, remove leading dashes
         run: echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' -e 's/[^0-9a-zA-Z\-]*//g' -e 's/^-*//g' | awk '{print tolower($0)}')" >> $GITHUB_ENV
 
