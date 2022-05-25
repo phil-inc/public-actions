@@ -7,7 +7,6 @@ on:
         value: ${{ jobs.generate_tag.outputs.tag }}
 jobs:
   generate_tag:
-    runs-on: self-hosted
     container:
       image: "ubuntu:latest"
     outputs:
