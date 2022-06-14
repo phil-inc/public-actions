@@ -1,0 +1,23 @@
+name: phil_helm_package
+on:
+  workflow_call:
+    inputs:
+      directories:
+        description: 'Stringified JSON object listing directories to build'
+        default: ''
+        required: false
+        type: string
+jobs:
+  helm_package:
+    container: 
+      image: dtzar/helm-kubectl:3
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ${{fromJson(inputs.directories)}}
+    steps:
+    - name: Print directory
+      run: echo "${{ matrix.directory }}"
+  #     run public action to build with dependencies and upload to repository
+  #     - if branch is master, upload the package name
+  #     - if branch is feature branch, prepend the branch name
