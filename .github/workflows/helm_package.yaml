@@ -17,4 +17,4 @@ jobs:
         directory: ${{fromJson(inputs.directories)}}
     steps:
     - name: Package chart
-      run: helm package . --dependency-update
+      run: cd ${{ matrix.directory}} && helm package . --dependency-update
