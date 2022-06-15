@@ -7,6 +7,11 @@ on:
         default: ''
         required: false
         type: string
+      # push:
+      #   description: "Boolean indicating whether or not to push built charts"
+      #   default: false
+      #   required: false
+      #   type: boolean
 jobs:
   helm_package:
     container: 
@@ -16,5 +21,9 @@ jobs:
       matrix:
         directory: ${{fromJson(inputs.directories)}}
     steps:
+    - uses: actions/checkout@v2
     - name: Package chart
       run: cd ${{ matrix.directory}} && helm package . --dependency-update
+    - name: Login to DockerHub
+      #  if: ${{ inputs.push }}
+      run: docker login -u ${{ secrets.docker_username }} -p ${{ secrets.docker_password }}
