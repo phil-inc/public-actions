@@ -35,4 +35,3 @@ jobs:
       - name: Push
         if: ${{ inputs.push }}
         run: docker push ${{ inputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
-
