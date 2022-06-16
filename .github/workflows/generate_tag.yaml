@@ -23,7 +23,7 @@ jobs:
         run: |
           branch=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' -e 's/[^0-9a-zA-Z\-]*//g' -e 's/^-*//g' | awk '{print tolower($0)}')
           sha=$(echo ${{ github.sha }} | cut -c 1-8)
-          echo "tag=$(printf \"%s-%s\" \"$branch\" \"sha\")" >> $GITHUB_ENV
+          echo "tag=$(printf \"%s-%s\" $branch $sha)" >> $GITHUB_ENV
 
       - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
         if: ${{ github.ref_name == github.event.repository.default_branch }}
