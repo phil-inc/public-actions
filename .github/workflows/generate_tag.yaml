@@ -20,7 +20,10 @@ jobs:
       - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
         if: startsWith(github.ref_name, 'feature/')
         # Remove "feature/", replace underscores with dashes, remove special characters, remove leading dashes
-        run: echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' -e 's/[^0-9a-zA-Z\-]*//g' -e 's/^-*//g' | awk '{print tolower($0)}')" >> $GITHUB_ENV
+        run: |
+          branch=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' -e 's/[^0-9a-zA-Z\-]*//g' -e 's/^-*//g' | awk '{print tolower($0)}')
+          sha=$(echo ${{ github.sha }} | cut -c 1-8)
+          echo "tag=$(printf \"%s-%s\" $branch $sha)" >> $GITHUB_ENV
 
       - name: If the ref is master/relase, set the tag to the first 8 of the commit sha
         if: ${{ github.ref_name == github.event.repository.default_branch }}
