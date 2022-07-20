@@ -44,6 +44,7 @@ jobs:
         uses: nakamuraos/google-chat-notifications@v2.0.1
         with:
           title: Build
+          subtitle: ${{ github.event.head_commit.message }}
           webhookUrl: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
           status: ${{ job.status }}
       - name: Login to DockerHub
@@ -57,6 +58,7 @@ jobs:
         uses: nakamuraos/google-chat-notifications@v2.0.1
         with:
           title: Push
+          subtitle: ${{ github.event.head_commit.message }}
           webhookUrl: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
           status: ${{ job.status }}
 
