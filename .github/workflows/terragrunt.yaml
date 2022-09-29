@@ -19,6 +19,12 @@ jobs:
       - uses: hashicorp/setup-terraform@v2
         with:
           cli_config_credentials_token: ${{ secrets.TF_TOKEN }}
+          
+      - name: Setup Terragrunt
+        run: |
+          sudo weget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.38.12/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 
       - name: Setup SSH keys & known_hosts
         env:
