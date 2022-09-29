@@ -62,6 +62,9 @@ jobs:
         run: terragrunt plan
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
+          TF_VAR_tailscale_authkey: ${{ secrets.TS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.KEY_ID }}
 
       - uses: actions/github-script@v6
         if: ${{ github.event_name }} == 'pull_request'
