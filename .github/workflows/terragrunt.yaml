@@ -37,7 +37,7 @@ jobs:
           chmod 600 "$SSH_PATH/id_rsa"
 
           eval $(ssh-agent)
-          ssh-add "$SSH_PATH/id-rsa"
+          ssh-add "$SSH_PATH/id_rsa"
 
       - name: Terragrunt fmt
         id: fmt
