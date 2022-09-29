@@ -1,0 +1,107 @@
+name: phil_terragrunt_ci
+
+on:
+  workflow_call:
+    inputs:
+      directories:
+        description: Directories to execute jobs in
+        type: string
+        default: "."
+
+jobs:
+  terragrunt_ci:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ${{fromJson(inputs.directories)}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_TOKEN }}
+
+      - name: Setup SSH keys & known_hosts
+        env:
+          PRIVATE_KEY: ${{ secrets.TERRAFORM_GH_SSH }}
+        run: |
+          SSH_PATH="$HOME/.ssh"
+
+          mkdir -p "$SSH_PATH"
+          touch "$SSH_PATH/known_hosts"
+
+          echo "$PRIVATE_KEY" > "$SSH_PATH/id_rsa"
+
+          chmod 700 "$SSH_PATH"
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 "$SSH_PATH/known_hosts"
+          chmod 600 "$SSH_PATH/id_rsa"
+
+          eval $(ssh-agent)
+          ssh-add "$SSH_PATH/id-rsa"
+
+      - name: Terragrunt fmt
+        id: fmt
+        run: terragrunt fmt -check
+        env:
+          TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
+
+      - name: Terragrunt init
+        id: init
+        run: terragrunt init
+        env:
+          TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
+
+      - name: Terragrunt plan
+        id: plan
+        run: terragrunt plan
+        env:
+          TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
+
+      - uses: actions/github-script@v6
+        if: ${{ github.event_name }} == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Get PR comments
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+
+            // Parse for this comment
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('${{ matrix.directory }}')
+            })
+
+            // Create output for this comment
+            const output = `### Directory: ${{ matrix.directory }}
+            #### Terragrunt Format & Style \`${{ steps.fmt.outcome }}\`
+            #### Terragrunt Initialization \`${{ steps.init.outcome }}\`
+            #### Terragrunt Plan \`${{ steps.plan.outcome }}\`
+            <details><summary>Plan Output</summary>
+
+            \`\`\`\n
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\`\n
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            // If this comment already exists, update it
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
