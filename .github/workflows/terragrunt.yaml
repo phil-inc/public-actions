@@ -7,6 +7,11 @@ on:
         description: Directories to execute jobs in
         type: string
         default: "."
+      apply:
+        description: If true, perform apply
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   terragrunt_ci:
@@ -65,6 +70,16 @@ jobs:
           TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+
+      - name: Terragrunt apply
+        id: apply
+        if: ${{ inputs.apply }}
+        run: terragrunt apply PLAN
+        env:
+          TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
+          TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          AWS_ACCES_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
 
       - uses: actions/github-script@v6
         if: ${{ github.event_name }} == 'pull_request'
