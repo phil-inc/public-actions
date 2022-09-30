@@ -59,7 +59,7 @@ jobs:
 
       - name: Terragrunt plan
         id: plan
-        run: terragrunt plan
+        run: terragrunt plan -no-color -out=PLAN
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
           TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
