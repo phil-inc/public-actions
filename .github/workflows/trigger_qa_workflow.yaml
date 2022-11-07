@@ -1,0 +1,16 @@
+name: Trigger End to End Tests
+on:
+  workflow_call:
+jobs:
+  triggering_tests:
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: phil-inc
+          repo: pyphil
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_user: vlad-phil
+          workflow_file_name: ui_tests.yaml
+          ref: master
+          propagate_failure: false
+          trigger_workflow: true
+          wait_workflow: false
