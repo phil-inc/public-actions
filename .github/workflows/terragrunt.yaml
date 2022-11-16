@@ -3,14 +3,6 @@ name: phil_terragrunt_ci
 on:
   workflow_call:
     inputs:
-      aws_access_key_id:
-        description: AWS Access Key ID for logging in
-        type: string
-        default: ""
-      aws_secret_access_key:
-        description: AWS Secret Access Key for logging in
-        type: string
-        default: ""
       directories:
         description: Directories to execute jobs in
         type: string
@@ -76,8 +68,8 @@ jobs:
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
           TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
-          AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-          AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
       - name: Terragrunt apply
         id: apply
@@ -86,8 +78,8 @@ jobs:
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
           TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
-          AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-          AWS_ACCES_KEY_ID: ${{ inputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
       - uses: actions/github-script@v6
         if: ${{ github.event_name }} == 'pull_request'
