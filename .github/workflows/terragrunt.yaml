@@ -2,6 +2,17 @@ name: phil_terragrunt_ci
 
 on:
   workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+      TS_TOKEN:
+        required: false
+      TF_TOKEN:
+        required: false
+      TERRAFORM_GH_SSH:
+        required: false
     inputs:
       directories:
         description: Directories to execute jobs in
