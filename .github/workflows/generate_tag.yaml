@@ -27,8 +27,8 @@ jobs:
 
       - name: If not a git tag or feature branch, set the image tag to the first 8 of the commit sha
         if: ${{ github.ref_type != 'tag' && !startsWith(github.ref_name, 'feature/') }}
-        run: echo "tag=$(echo ${{ github.sha }} | cut -c 1-8)" >> $GITHUB_ENV  
+        run: echo "tag=$(echo ${{ github.sha }} | cut -c 1-8)" >> $GITHUB_ENV
 
       - name: Set output
         id: set-output
-        run: echo "::set-output name=tag::${{ env.tag }}"
+        run: echo "tag=${{ env.tag }}" >> $GITHUB_OUTPUT
