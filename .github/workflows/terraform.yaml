@@ -1,25 +1,34 @@
 name: phil_terraform_ci
 on:
   workflow_call:
+    inputs:
+      directories:
+        description: "Execute in these directories"
+        type: string
+        default: "."
+  
 
 jobs:
   terraform_ci:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ${{fromJson(inputs.directories)}}
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
 
       - name: Terraform fmt
         id: fmt
-        run: terraform fmt -check
+        run: terraform fmt -check -chdir=${{ matrix.directory }}
 
       - name: Terraform init
         id: init
-        run: terraform init
+        run: terraform init -chdir=${{ matrix.directory }}
 
       - name: Terraform validate
         id: validate
-        run: terraform validate -no-color
+        run: terraform validate -no-color -chdir=${{ matrix.directory }}
 
       - uses: actions/github-script@v6
         if: ${{ github.event_name }} == 'pull_request'
@@ -35,11 +44,12 @@ jobs:
 
             // Parse for this comment
             const botComment = comments.find(comment => {
-              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format & Style')
+              return comment.user.type === 'Bot' && comment.body.includes('${{ matrix.directory }}')
             })
 
             // Create output for this comment
-            const output = `#### Terraform Format & Style \`${{ steps.fmt.outcome }}\`
+            const output = `### ${{ matrix.directory }}`
+            #### Terraform Format & Style \`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization \`${{ steps.init.outcome }}\`
             #### Terraform Validation \`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
