@@ -20,15 +20,15 @@ jobs:
 
       - name: Terraform fmt
         id: fmt
-        run: terraform fmt -check -chdir=${{ matrix.directory }}
+        run: terraform -chdir=${{ matrix.directory }}  fmt -check
 
       - name: Terraform init
         id: init
-        run: terraform init -chdir=${{ matrix.directory }}
+        run: terraform -chdir=${{ matrix.directory }} init
 
       - name: Terraform validate
         id: validate
-        run: terraform validate -no-color -chdir=${{ matrix.directory }}
+        run: terraform validate -chdir=${{ matrix.directory }} -no-color
 
       - uses: actions/github-script@v6
         if: ${{ github.event_name }} == 'pull_request'
