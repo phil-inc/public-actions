@@ -28,7 +28,7 @@ jobs:
 
       - name: Terraform validate
         id: validate
-        run: terraform validate -chdir=${{ matrix.directory }} -no-color
+        run: terraform -chdir=${{ matrix.directory }} validate  -no-color
 
       - uses: actions/github-script@v6
         if: ${{ github.event_name }} == 'pull_request'
