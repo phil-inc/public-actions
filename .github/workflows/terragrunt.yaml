@@ -7,8 +7,6 @@ on:
         required: false
       AWS_SECRET_ACCESS_KEY:
         required: false
-      TS_TOKEN:
-        required: false
       TF_TOKEN:
         required: false
       TERRAFORM_GH_SSH:
@@ -61,34 +59,32 @@ jobs:
           eval $(ssh-agent)
           ssh-add "$SSH_PATH/id_rsa"
 
-      - name: Terragrunt fmt
-        id: fmt
-        run: terragrunt fmt -check
+      - name: Terragrunt init
+        id: init
+        run: terragrunt run-all init
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
 
-      - name: Terragrunt init
-        id: init
-        run: terragrunt init
+      - name: Terragrunt fmt
+        id: fmt
+        run: terragrunt run-all fmt -check
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
 
       - name: Terragrunt plan
         id: plan
-        run: terragrunt plan -no-color -out=PLAN
+        run: terragrunt run-all plan -no-color -out=PLAN
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
-          TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
       - name: Terragrunt apply
         id: apply
         if: ${{ inputs.apply }}
-        run: terragrunt apply PLAN
+        run: terragrunt run-all apply PLAN
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
-          TF_VAR_tailscale_authkey: ${{ secrets.TS_TOKEN }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
