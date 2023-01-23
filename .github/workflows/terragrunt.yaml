@@ -83,7 +83,7 @@ jobs:
       - name: Terragrunt apply
         id: apply
         if: ${{ inputs.apply }}
-        run: terragrunt run-all apply PLAN
+        run: terragrunt run-all apply PLAN --terragrunt-non-interactive
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
