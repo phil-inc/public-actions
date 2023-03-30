@@ -68,7 +68,7 @@ jobs:
 
       - name: Terragrunt fmt
         id: fmt
-        run: terragrunt run-all fmt -check
+        run: terragrunt run-all hclfmt -check
         env:
           TERRAGRUNT_WORKING_DIR: ${{ matrix.directory }}
 
