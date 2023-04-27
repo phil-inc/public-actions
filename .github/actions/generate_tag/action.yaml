@@ -8,11 +8,13 @@ runs:
   steps:
     - name: If the ref is a git tag, remove the leading v
       if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
+      shell: bash
       run: echo "tag=$(echo \"${{ github.ref_name }}\" | sed -e 's/v//1' )" >> $GITHUB_ENV
 
     - name: If the ref is feature branch, lowercase it and replace all special chars with hyphens
       if: startsWith(github.ref_name, 'feature/')
       # Remove "feature/", replace underscores with dashes, remove special characters, remove leading dashes
+      shell: bash
       run: |
         branch=$(echo \"${{ github.ref_name }}\" | sed -e 's/feature\///g' -e 's/_/-/g' -e 's/[^0-9a-zA-Z\-]*//g' -e 's/^-*//g' | awk '{print tolower($0)}')
         sha=$(echo ${{ github.sha }} | cut -c 1-8)
@@ -20,9 +22,10 @@ runs:
 
     - name: If not a git tag or feature branch, set the image tag to the first 8 of the commit sha
       if: ${{ github.ref_type != 'tag' && !startsWith(github.ref_name, 'feature/') }}
+      shell: bash
       run: echo "tag=$(echo ${{ github.sha }} | cut -c 1-8)" >> $GITHUB_ENV  
 
     - name: Set output
       id: set-output
-      run: echo "tag=${{ env.tag }}" >> $GITHUB_OUTPUT
       shell: bash
+      run: echo "tag=${{ env.tag }}" >> $GITHUB_OUTPUT
