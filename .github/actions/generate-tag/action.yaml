@@ -1,8 +1,4 @@
 name: phil_generate_tag
-outputs:
-  tag:
-    description: "Generated tag based on Git event"
-    value: ${{ steps.set-output.outputs.tag }}
 runs:
   using: "composite"
   steps:
@@ -24,8 +20,3 @@ runs:
       if: ${{ github.ref_type != 'tag' && !startsWith(github.ref_name, 'feature/') }}
       shell: bash
       run: echo "tag=$(echo ${{ github.sha }} | cut -c 1-8)" >> $GITHUB_ENV  
-
-    - name: Set output
-      id: set-output
-      shell: bash
-      run: echo "tag=${{ env.tag }}" >> $GITHUB_OUTPUT
