@@ -1,0 +1,77 @@
+# Expects docker_username and docker_password secrets to be inherited
+
+name: phil_build_push
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: "Name of project"
+        type: string
+        required: true
+      tag:
+        description: "Tag to associate with built image"
+        type: string
+        required: true
+      region:
+        description: "Push into this AWS region"
+        type: string
+        required: false
+        default: "us-east-1"
+      push:
+        description: "Whether or not to push the image to the registry"
+        type: boolean
+        required: false
+        default: false
+      dockerfile:
+        description: "A path to a Dockerfile to build"
+        type: string
+        required: false
+        default: "Dockerfile"
+      notify:
+        description: "Whether or not to send a message to gchat"
+        type: boolean
+        required: false
+        default: false
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        if: ${{ inputs.push }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.region }}
+      
+      - name: Login to Amazon ECR
+        if: ${{ inputs.push }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+            
+      - name: Build
+        run: docker build . -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} -f ${{ inputs.dockerfile }}
+
+      - name: Notify Build
+        if: ${{ inputs.notify }}
+        uses: nakamuraos/google-chat-notifications@v2.0.1
+        with:
+          title: Build
+          subtitle: ${{ github.event.head_commit.message }}
+          webhookUrl: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+          status: ${{ job.status }}
+
+      - name: Push
+        if: ${{ inputs.push }}
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
+  
+      - name: Notify Push
+        if: ${{ inputs.notify }} && ${{ inputs.push }}
+        uses: nakamuraos/google-chat-notifications@v2.0.1
+        with:
+          title: Push
+          subtitle: ${{ github.event.head_commit.message }}
+          webhookUrl: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+          status: ${{ job.status }}
