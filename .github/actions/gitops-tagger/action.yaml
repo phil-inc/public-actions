@@ -1,0 +1,44 @@
+---
+name: 'GitOps Tagger'
+description: Send data to a GitOps Tagger webhook
+
+inputs:
+
+  application:
+    description: "The application in the repository to update"
+    required: true
+
+  gitops_tagger_secret_key:
+    description: "The secret key signing the payload"
+    required: true
+
+  tag:
+    description: "The new image tag"
+    required: true
+
+  repository:
+    description: "The gitops repository to update"
+    required: true
+    default: git@github.com:phil-inc/phil-cicd.git
+
+  url:
+    description: "The URL of the gitops tagger webhook"
+    required: true
+    default: https://gitops-tagger.dev.phil.us/webhook
+
+runs:
+  using: "composite"
+  steps:
+  - name: "Sign Payload & Consume Webhook"
+    shell: bash
+    env:
+      GITOPS_TAGGER_SECRET_KEY: ${{ inputs.gitops_tagger_secret_key }}
+    run: |
+      PAYLOAD=$(echo -n '{"repository":"${{ inputs.repository }}","tag":"${{ inputs.tag  }}","application":"${{ inputs.application }}"}')
+
+      SIGNED_PAYLOAD=$(echo -n ${PAYLOAD} | openssl sha256 -hmac "${GITOPS_TAGGER_SECRET_KEY}" -binary | xxd -p -c 256)
+
+      curl ${{ inputs.url }} \
+            -H "Content-Type: application/json" \
+            -H "x-phil-signature: sha256=${SIGNED_PAYLOAD}" \
+            --data ${PAYLOAD}
