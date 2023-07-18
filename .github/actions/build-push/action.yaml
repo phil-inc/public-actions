@@ -1,6 +1,6 @@
 ---
-name: 'Build and Push to ECR'
-description: Runs a docker build, then pushes the image to ECR
+name: 'Build and Push to ECR and DockerHub'
+description: Runs a docker build, then pushes the image to ECR and DockerHub
 inputs:
   name:
     description: "Name of project"
@@ -26,7 +26,7 @@ inputs:
     required: false
     default: "us-east-1"
   push:
-    description: "Whether or not to push the image to the registry"
+    description: "Whether or not to push the image to ECR and DockerHub"
     type: boolean
     required: false
     default: false
