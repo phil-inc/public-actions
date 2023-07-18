@@ -45,6 +45,21 @@ inputs:
     type: string
     required: false
     default: ""
+  docker-username:
+    description: "Username for Docker account"
+    type: string
+    required: false
+    default: ""
+  docker-password:
+    description: "Password for Docker account"
+    type: string
+    required: false
+    default: ""
+  docker-registry:
+    description: "Docker registry to push images to"
+    type: string
+    required: false
+    default: "oci://registry-1.docker.io/philinc"
 runs:
   using: "composite"
   steps:
@@ -75,9 +90,20 @@ runs:
       webhookUrl: ${{ inputs.google-chat-webhook }}
       status: ${{ job.status }}
 
-  - name: Push
+  - name: Push to ECR
     if: ${{ inputs.push }}
     run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
+
+  - name: Login to DockerHub
+    if: ${{ inputs.push }}
+    run: docker login -u ${{ inputs.docker-username }} -p ${{ inputs.docker-password }}
+
+  - name: Tag for DockerHub
+    run: docker tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
+
+  - name: Push to DockerHub
+    if: ${{ inputs.push }}
+    run: docker push ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Notify Push
     if: ${{ inputs.notify }} && ${{ inputs.push }}
