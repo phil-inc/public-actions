@@ -1,0 +1,115 @@
+---
+name: 'Build and Push to ECR and DockerHub'
+description: Runs a docker build, then pushes the image to ECR and DockerHub
+inputs:
+  name:
+    description: "Name of project"
+    type: string
+    required: true
+  tag:
+    description: "Tag to associate with built image"
+    type: string
+    required: true
+  aws-access-key-id:
+    description: "Access key for AWS account"
+    type: string
+    required: false
+    default: ""
+  aws-secret-access-key:
+    description: "Secret key for AWS account"
+    type: string
+    required: false
+    default: ""
+  region:
+    description: "Push into this AWS region"
+    type: string
+    required: false
+    default: "us-east-1"
+  push:
+    description: "Whether or not to push the image to ECR and DockerHub"
+    type: boolean
+    required: false
+    default: false
+  dockerfile:
+    description: "A path to a Dockerfile to build"
+    type: string
+    required: false
+    default: "Dockerfile"
+  notify:
+    description: "Whether or not to send a message to gchat"
+    type: boolean
+    required: false
+    default: false
+  google-chat-webhook:
+    description: "Webhook for sending a google chat notification"
+    type: string
+    required: false
+    default: ""
+  docker-username:
+    description: "Username for Docker account"
+    type: string
+    required: false
+    default: ""
+  docker-password:
+    description: "Password for Docker account"
+    type: string
+    required: false
+    default: ""
+  docker-registry:
+    description: "Docker registry to push images to"
+    type: string
+    required: false
+    default: "oci://registry-1.docker.io/philinc"
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/checkout@v3
+
+  - name: Configure AWS credentials
+    if: ${{ inputs.push }}
+    uses: aws-actions/configure-aws-credentials@v2
+    with:
+      aws-access-key-id: ${{ inputs.aws-access-key-id }}
+      aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+      aws-region: ${{ inputs.region }}
+  
+  - name: Login to Amazon ECR
+    if: ${{ inputs.push }}
+    id: login-ecr
+    uses: aws-actions/amazon-ecr-login@v1
+        
+  - name: Build
+    run: docker build . -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} -f ${{ inputs.dockerfile }}
+
+  - name: Notify Build
+    if: ${{ inputs.notify }}
+    uses: nakamuraos/google-chat-notifications@v2.0.1
+    with:
+      title: Build
+      subtitle: ${{ github.event.head_commit.message }}
+      webhookUrl: ${{ inputs.google-chat-webhook }}
+      status: ${{ job.status }}
+
+  - name: Push to ECR
+    if: ${{ inputs.push }}
+    run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
+
+  - name: Login to DockerHub
+    if: ${{ inputs.push }}
+    run: docker login -u ${{ inputs.docker-username }} -p ${{ inputs.docker-password }}
+
+  - name: Tag for DockerHub
+    run: docker tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
+
+  - name: Push to DockerHub
+    if: ${{ inputs.push }}
+    run: docker push ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
+
+  - name: Notify Push
+    if: ${{ inputs.notify }} && ${{ inputs.push }}
+    uses: nakamuraos/google-chat-notifications@v2.0.1
+    with:
+      title: Push
+      subtitle: ${{ github.event.head_commit.message }}
+      webhookUrl: ${{ inputs.google-chat-webhook}}
+      status: ${{ job.status }}
