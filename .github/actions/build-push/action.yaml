@@ -79,6 +79,7 @@ runs:
     uses: aws-actions/amazon-ecr-login@v1
         
   - name: Build
+    shell: bash
     run: docker build . -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} -f ${{ inputs.dockerfile }}
 
   - name: Notify Build
@@ -92,17 +93,21 @@ runs:
 
   - name: Push to ECR
     if: ${{ inputs.push }}
+    shell: bash
     run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Login to DockerHub
     if: ${{ inputs.push }}
+    shell: bash
     run: docker login -u ${{ inputs.docker-username }} -p ${{ inputs.docker-password }}
 
   - name: Tag for DockerHub
+    shell: bash
     run: docker tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Push to DockerHub
     if: ${{ inputs.push }}
+    shell: bash
     run: docker push ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Notify Push
