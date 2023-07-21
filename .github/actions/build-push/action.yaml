@@ -59,7 +59,7 @@ inputs:
     description: "Docker registry to push images to"
     type: string
     required: false
-    default: "oci://registry-1.docker.io/philinc"
+    default: "philinc"
 runs:
   using: "composite"
   steps:
