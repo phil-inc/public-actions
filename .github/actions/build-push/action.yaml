@@ -66,7 +66,7 @@ runs:
   - uses: actions/checkout@v3
 
   - name: Configure AWS credentials
-    if: ${{ inputs.push }}
+    if: ${{ inputs.push }} == 'true'
     uses: aws-actions/configure-aws-credentials@v2
     with:
       aws-access-key-id: ${{ inputs.aws-access-key-id }}
@@ -74,7 +74,7 @@ runs:
       aws-region: ${{ inputs.region }}
   
   - name: Login to Amazon ECR
-    if: ${{ inputs.push }}
+    if: ${{ inputs.push }} == 'true'
     id: login-ecr
     uses: aws-actions/amazon-ecr-login@v1
         
@@ -83,7 +83,7 @@ runs:
     run: docker build . -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} -f ${{ inputs.dockerfile }}
 
   - name: Notify Build
-    if: ${{ inputs.notify }}
+    if: ${{ inputs.notify }} == 'true'
     uses: nakamuraos/google-chat-notifications@v2.0.1
     with:
       title: Build
@@ -92,12 +92,12 @@ runs:
       status: ${{ job.status }}
 
   - name: Push to ECR
-    if: ${{ inputs.push }}
+    if: ${{ inputs.push }} == 'true'
     shell: bash
     run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Login to DockerHub
-    if: ${{ inputs.push }}
+    if: ${{ inputs.push }} == 'true'
     shell: bash
     run: docker login -u ${{ inputs.docker-username }} -p ${{ inputs.docker-password }}
 
@@ -106,12 +106,12 @@ runs:
     run: docker tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Push to DockerHub
-    if: ${{ inputs.push }}
+    if: ${{ inputs.push }} == 'true'
     shell: bash
     run: docker push ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Notify Push
-    if: ${{ inputs.notify }} && ${{ inputs.push }}
+    if: ${{ inputs.notify }} == 'true' && ${{ inputs.push }} == 'true'
     uses: nakamuraos/google-chat-notifications@v2.0.1
     with:
       title: Push
