@@ -74,7 +74,7 @@ runs:
     run: docker build . -t ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }} -f ${{ inputs.dockerfile }}
 
   - name: Notify Build
-    if: ${{ inputs.notify == true }}
+    if: ${{ inputs.notify == 'true' }}
     uses: nakamuraos/google-chat-notifications@v2.0.1
     with:
       title: Build
@@ -83,17 +83,17 @@ runs:
       status: ${{ job.status }}
 
   - name: Login to DockerHub
-    if: ${{ inputs.push == true }}
+    if: ${{ inputs.push == 'true' }}
     shell: bash
     run: docker login -u ${{ inputs.docker-username }} -p ${{ inputs.docker-password }}
 
   - name: Push to DockerHub
-    if: ${{ inputs.push == true }}
+    if: ${{ inputs.push == 'true' }}
     shell: bash
     run: docker push ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Configure AWS credentials
-    if: ${{ inputs.push == true }}
+    if: ${{ inputs.push == 'true' }}
     uses: aws-actions/configure-aws-credentials@v2
     with:
       aws-access-key-id: ${{ inputs.aws-access-key-id }}
@@ -101,22 +101,22 @@ runs:
       aws-region: ${{ inputs.region }}
   
   - name: Login to ECR
-    if: ${{ inputs.push == true }}
+    if: ${{ inputs.push == 'true' }}
     id: login-ecr
     uses: aws-actions/amazon-ecr-login@v1
 
   - name: Tag for ECR
-    if: ${{ inputs.push == true }}
+    if: ${{ inputs.push == 'true' }}
     shell: bash
     run: docker tag ${{ inputs.docker-registry }}/${{ inputs.name }}:${{ inputs.tag }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }} 
 
   - name: Push to ECR
-    if: ${{ inputs.push == true }}
+    if: ${{ inputs.push == 'true' }}
     shell: bash
     run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.name }}:${{ inputs.tag }}
 
   - name: Notify Push
-    if: ${{ inputs.notify == true && inputs.push == true }}
+    if: ${{ inputs.notify == 'true' && inputs.push == 'true' }}
     uses: nakamuraos/google-chat-notifications@v2.0.1
     with:
       title: Push
