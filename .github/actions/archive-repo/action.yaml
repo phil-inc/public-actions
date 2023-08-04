@@ -29,10 +29,10 @@ inputs:
     default: "us-east-1"
 
   bucket:
-    description: "Name of the S3 bucket to store the archive in"
+    description: "Name of the S3 bucket (and folder path if desired) to store the archive in"
     type: string
     required: false
-    default: "phil-code-archives"
+    default: "philrx-archives-stg/repositories"
 
 runs:
   using: "composite"
