@@ -41,7 +41,7 @@ runs:
   - name: Create archive
     shell: bash
     run: |
-      mkdir archive
+      mkdir -p archive
       git fetch
       git archive HEAD | gzip > ./archive/repo.tar.gz
       tar -czf ./archive/git.tar.gz .git
