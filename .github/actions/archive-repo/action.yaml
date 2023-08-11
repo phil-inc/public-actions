@@ -57,4 +57,5 @@ runs:
   - name: Upload to S3
     shell: bash
     run: |
-      aws s3 sync ./archive s3://${{ inputs.bucket }}/${{ github.repository }}/${{ github.ref_name }}
+      aws s3 cp ./archive/repo.tar.gz s3://${{ inputs.bucket }}/${{ github.repository }}/${{ github.ref_name }}/repo.tar.gz
+      aws s3 cp ./archive/git.tar.gz s3://${{ inputs.bucket }}/${{ github.repository }}/${{ github.ref_name }}/git.tar.gz
