@@ -103,7 +103,7 @@ runs:
   - name: Login to ECR
     if: ${{ inputs.push == 'true' }}
     id: login-ecr
-    uses: aws-actions/amazon-ecr-login@v1
+    uses: aws-actions/amazon-ecr-login@v2
 
   - name: Tag for ECR
     if: ${{ inputs.push == 'true' }}
